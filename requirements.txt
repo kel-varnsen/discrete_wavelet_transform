@@ -1,6 +1,7 @@
 streamlit==1.38.0
 numpy==1.26.4
 matplotlib==3.10.1
-PyWavelets==1.4.1
+PyWavelets
 scipy==1.15.3
 wfdb==4.3.0
+
