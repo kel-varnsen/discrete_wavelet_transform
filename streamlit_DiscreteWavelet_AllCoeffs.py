@@ -106,9 +106,12 @@ for l in range(1, level + 1):
     coeffs_l = pywt.wavedec(ecg_sig, wavelet, level=l)
     cA_l = coeffs_l[0]
     # cD_l (the detail corresponding to level l's scale) is at index 1 in coeffs_l
+    details = coeffs_l[1:]  # list of cD_l,...,cD1
     cD_l = coeffs_l[1]
 
     # Reconstruct only the approximation at level l using waverec with zeros for details
+    approx_rec_raw = interpolate_to_length(cA_l, n_samples)
+
     try:
         # build coeffs list with only cA_l kept
         coeffs_approx = [cA_l] + [np.zeros_like(c) for c in coeffs_l[1:]]
@@ -117,8 +120,12 @@ for l in range(1, level + 1):
         approx_rec = interpolate_to_length(cA_l, n_samples)
 
     # Reconstruct only detail D_l by zeroing everything except coeffs_l[1]
+    detail_rec_raw = interpolate_to_length(cD_l, n_samples)
     try:
-        coeffs_detail = [np.zeros_like(cA_l)] + [cD_l] + [np.zeros_like(c) for c in coeffs_l[2:]]
+        #coeffs_detail = [np.zeros_like(cA_l)] + [cD_l] + [np.zeros_like(c) for c in coeffs_l[2:]] 
+        coeffs_detail = [np.zeros_like(cA_l), cD_l]
+        if len(coeffs_l) > 2:
+            coeffs_detail.extend([np.zeros_like(c) for c in coeffs_l[2:]])
         detail_rec = pywt.waverec(coeffs_detail, wavelet)
     except Exception:
         detail_rec = interpolate_to_length(cD_l, n_samples)
@@ -133,15 +140,15 @@ for l in range(1, level + 1):
         return interpolate_to_length(x, n_samples)
 
     # If coefficient arrays are single values (lowest-level), extend as constant
-    if len(cA_l) == 1:
-        approx_interp = np.full(n_samples, float(cA_l[0]))
-    else:
-        approx_interp = ensure_full_length(approx_rec)
+    #if len(cA_l) == 1:
+    #    approx_interp = np.full(n_samples, float(cA_l[0]))
+    #else:
+    approx_interp = ensure_full_length(approx_rec)
 
-    if len(cD_l) == 1:
-        detail_interp = np.full(n_samples, float(cD_l[0]))
-    else:
-        detail_interp = ensure_full_length(detail_rec)
+    #if len(cD_l) == 1:
+    #    detail_interp = np.full(n_samples, float(cD_l[0]))
+    #else:
+    detail_interp = ensure_full_length(detail_rec)
 
     # Quick sanity: show coefficient counts to confirm expected halving behavior
     #st.write(f"cA_l length: {len(cA_l)}, cD_l length: {len(cD_l)}")
@@ -156,7 +163,7 @@ for l in range(1, level + 1):
     with col1:
         st.write(f"**Approximation (A{l})**: {len(cA_l)} coefficients")
         fig_at, ax_at = plt.subplots(figsize=(6, 3))
-        ax_at.plot(ecg_t, approx_interp, '-', linewidth=1.5)
+        ax_at.plot(ecg_t, approx_rec_raw, '-', linewidth=1.5)
         ax_at.set_xlabel('Time (s)')
         ax_at.set_ylabel('Amplitude')
         ax_at.set_xlim(0, duration)
@@ -167,7 +174,7 @@ for l in range(1, level + 1):
     with col2:
         st.write(f"**Detail (D{l})**: {len(cD_l)} coefficients")
         fig_dt, ax_dt = plt.subplots(figsize=(6, 3))
-        ax_dt.plot(ecg_t, detail_interp, '-', linewidth=1.5)
+        ax_dt.plot(ecg_t, detail_rec_raw, '-', linewidth=1.5)
         ax_dt.set_xlabel('Time (s)')
         ax_dt.set_ylabel('Amplitude')
         ax_dt.set_xlim(0, duration)
