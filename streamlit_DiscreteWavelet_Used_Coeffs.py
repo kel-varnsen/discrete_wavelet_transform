@@ -9,6 +9,16 @@ import wfdb
 st.set_page_config(page_title="DWT Signal Analyzer (Per-level waverec)", layout="wide")
 st.title("Discrete Wavelet Transform Analyzer - Approximation and Detail Coefficients")
 
+
+st.image(
+        "DWT_Implementation.png",
+        #width=800,  # fixed width, won’t scale larger
+        use_column_width=True,  # scales to the page/column width
+        caption="DWT Implementation Diagram"
+      )
+
+
+
 # ----------------- Generate ECG -----------------
 @st.cache_data
 def generate_ecg():
