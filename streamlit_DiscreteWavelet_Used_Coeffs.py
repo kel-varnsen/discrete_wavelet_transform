@@ -71,6 +71,10 @@ wavelet = wavelet_families[selected_wavelet_name]
 max_level = pywt.dwt_max_level(n_samples, pywt.Wavelet(wavelet))
 level = st.sidebar.number_input(f"Decomposition Level (Max: {max_level})", min_value=1, max_value=max_level, value=min(3, max_level), step=1)
 
+
+
+
+
 # ----------------- Original Signal Plots -----------------
 original_spectrum = compute_spectrum(ecg_sig)
 freq_axis = np.linspace(0, fs/2, len(original_spectrum))
@@ -199,7 +203,27 @@ with colA_right:
 st.sidebar.divider()
 st.sidebar.header("Information")
 st.sidebar.write(f"**Signal Length:** {n_samples} samples")
-st.sidebar.write(f"**Duration:** {duration} seconds")
+st.sidebar.write(f"**Wavelet Length:** {pywt.Wavelet(wavelet).dec_len} samples")
+
+# # Prepare the figure
+# fig, axes = plt.subplots(1, 2, figsize=(6, 3))
+# wavelet_obj = pywt.Wavelet(wavelet)
+# L = wavelet_obj.dec_len 
+
+# # Get the scaling (phi) and wavelet (psi) functions
+# (phi, psi, x) = wavelet_obj.wavefun(level=5) # level=5 for smoothness
+
+# # Plot the  functions
+# axes[0].plot(x, psi)
+# axes[0].set_title('Wavelet Function (ψ)')
+
+# axes[1].plot(x, phi)
+# axes[1].set_title('Father Wavelet (φ)')
+# plt.tight_layout()
+# # 4. Display 
+# st.sidebar.pyplot(fig)
+
+st.sidebar.write(f"**Duration:** {np.round(duration,2)} seconds")
 st.sidebar.write(f"**Sampling Frequency:** {fs:.1f} Hz")
 st.sidebar.write(f"**Frequency Resolution:** {fs/n_samples:.3f} Hz")
 st.sidebar.write(f"**Nyquist Frequency:** {fs/2:.1f} Hz")
